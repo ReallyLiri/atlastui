@@ -1,35 +1,64 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
+	"fmt"
+	"github.com/reallyliri/atlaspect/inspect"
+	"github.com/samber/lo"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
+const (
+	version  = "0.0.1"
+	toolName = "atlaspect"
+	atlasCli = "atlas"
+)
 
-
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "atlaspect",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+var examples = []string{
+	`-u "mysql://user:pass@localhost:3306/dbname"`,
+	`-u "mariadb://user:pass@localhost:3306/" --schema=schemaA,schemaB -s schemaC`,
+	`--url "postgres://user:pass@host:port/dbname?sslmode=disable"`,
+	`-u "sqlite://file:ex1.db?_fk=1"`,
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+var params inspect.InspectParams
+
+var rootCmd = &cobra.Command{
+	Use:     toolName,
+	Version: version,
+	Short:   "Beautiful terminal UI for inspecting your database schemas",
+	Long: fmt.Sprintf(`Beautiful terminal UI for inspecting your database schemas.
+This is a complimentary CLI tool for atlas, an "atlas schema inspect" on steroids if you will.
+%s connects to the given database and visualize its schema.`, toolName),
+	Example:      strings.Join(lo.Map(examples, func(example string, _ int) string { return fmt.Sprintf("  %s %s", toolName, example) }), "\n"),
+	SilenceUsage: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if params.AtlasCliPath != "" {
+			err := verifyFileExists(params.AtlasCliPath)
+			if err != nil {
+				return err
+			}
+		} else {
+			cliPath, err := exec.LookPath(atlasCli)
+			if err != nil {
+				return fmt.Errorf("atlas cli not found in PATH")
+			}
+			params.AtlasCliPath = cliPath
+		}
+		schemas, err := inspect.Inspect(cmd.Context(), &params)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%v\n", schemas)
+		return nil
+	},
+}
+
 func Execute() {
+	rootCmd.HelpFunc()
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -37,15 +66,5 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.atlaspect.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	initFlags(rootCmd.Flags())
 }
-
-
