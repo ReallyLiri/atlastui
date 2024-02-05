@@ -50,3 +50,7 @@ type Schema struct {
 	Tables []Table `json:"tables,omitempty"`
 	Attrs
 }
+
+type Schemas struct {
+	Schemas []Schema `json:"schemas"`
+}

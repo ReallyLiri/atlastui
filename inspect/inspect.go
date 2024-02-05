@@ -9,17 +9,19 @@ import (
 )
 
 const cobraErrorPrefix = "Error: "
+const jsonFormat = "json"
 
 type InspectParams struct {
 	atlasexec.SchemaInspectParams
 	AtlasCliPath string
 }
 
-func Inspect(ctx context.Context, params *InspectParams) ([]Schema, error) {
+func Inspect(ctx context.Context, params *InspectParams) (*Schemas, error) {
 	atlasClient, err := atlasexec.NewClient("", params.AtlasCliPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create atlas client: %w", err)
 	}
+	params.SchemaInspectParams.Format = jsonFormat
 	raw, err := atlasClient.SchemaInspect(ctx, &params.SchemaInspectParams)
 	if err != nil {
 		if strings.HasPrefix(err.Error(), cobraErrorPrefix) {
@@ -28,10 +30,10 @@ func Inspect(ctx context.Context, params *InspectParams) ([]Schema, error) {
 		}
 		return nil, err
 	}
-	var schemas []Schema
+	var schemas Schemas
 	err = json.Unmarshal([]byte(raw), &schemas)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal schema: %w", err)
 	}
-	return schemas, nil
+	return &schemas, nil
 }

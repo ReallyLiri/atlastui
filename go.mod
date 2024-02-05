@@ -23,3 +23,5 @@ require (
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )
+
+replace ariga.io/atlas-go-sdk => github.com/reallyliri/atlas-go-sdk v0.0.0-20240205160716-f8f68bbe0caa
