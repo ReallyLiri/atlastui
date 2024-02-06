@@ -3,8 +3,8 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/reallyliri/atlaspect/inspect"
-	"github.com/reallyliri/atlaspect/tui"
+	"github.com/reallyliri/atlastui/inspect"
+	"github.com/reallyliri/atlastui/tui"
 	"github.com/samber/lo"
 	"os"
 	"os/exec"
@@ -15,7 +15,7 @@ import (
 
 const (
 	version  = "0.0.1"
-	toolName = "atlaspect"
+	toolName = "atlastui"
 	atlasCli = "atlas"
 )
 

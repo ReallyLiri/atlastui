@@ -1,4 +1,4 @@
-module github.com/reallyliri/atlaspect
+module github.com/reallyliri/atlastui
 
 go 1.21.0
 

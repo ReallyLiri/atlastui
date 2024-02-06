@@ -3,7 +3,7 @@ package tui
 import (
 	"context"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/reallyliri/atlaspect/inspect"
+	"github.com/reallyliri/atlastui/inspect"
 )
 
 type tableKey struct {

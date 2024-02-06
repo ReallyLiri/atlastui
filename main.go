@@ -1,6 +1,6 @@
 package main
 
-import "github.com/reallyliri/atlaspect/cmd"
+import "github.com/reallyliri/atlastui/cmd"
 
 func main() {
 	cmd.Execute()

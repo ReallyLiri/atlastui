@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const cobraErrorPrefix = "Error: "
+const cliErrorPrefix = "Error: "
 const jsonFormat = "json"
 
 type Params struct {
@@ -27,9 +27,9 @@ func Inspect(ctx context.Context, params *Params) (*Data, error) {
 	params.SchemaInspectParams.Format = jsonFormat
 	raw, err := atlasClient.SchemaInspect(ctx, &params.SchemaInspectParams)
 	if err != nil {
-		if strings.HasPrefix(err.Error(), cobraErrorPrefix) {
+		if strings.HasPrefix(err.Error(), cliErrorPrefix) {
 			// avoid printing cobra error prefix twice...
-			return nil, fmt.Errorf("%s", strings.TrimPrefix(err.Error(), cobraErrorPrefix))
+			return nil, fmt.Errorf("%s", strings.TrimPrefix(err.Error(), cliErrorPrefix))
 		}
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func unmarshal(raw []byte) (*Data, error) {
 	var data Data
 	err := json.Unmarshal(raw, &data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal data: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal data, please verify json formatting: %w", err)
 	}
 	return &data, nil
 }
