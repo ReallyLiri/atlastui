@@ -42,7 +42,10 @@ This is a complimentary CLI tool for atlas, an "atlas schema inspect" on steroid
 		if err != nil {
 			return err
 		}
-		return tui.Run(cmd.Context(), *data)
+		if len(data.Schemas) == 0 {
+			return fmt.Errorf("no schema found")
+		}
+		return tui.Run(cmd.Context(), toolName, *data)
 	},
 }
 
