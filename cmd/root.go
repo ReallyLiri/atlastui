@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"github.com/reallyliri/atlaspect/inspect"
 	"github.com/reallyliri/atlaspect/tui"
@@ -25,7 +26,7 @@ var examples = []string{
 	`-u "sqlite://file:ex1.db?_fk=1"`,
 }
 
-var params inspect.InspectParams
+var params inspect.Params
 
 var rootCmd = &cobra.Command{
 	Use:     toolName,
@@ -37,19 +38,7 @@ This is a complimentary CLI tool for atlas, an "atlas schema inspect" on steroid
 	Example:      strings.Join(lo.Map(examples, func(example string, _ int) string { return fmt.Sprintf("  %s %s", toolName, example) }), "\n"),
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if params.AtlasCliPath != "" {
-			err := verifyFileExists(params.AtlasCliPath)
-			if err != nil {
-				return err
-			}
-		} else {
-			cliPath, err := exec.LookPath(atlasCli)
-			if err != nil {
-				return fmt.Errorf("atlas cli not found in PATH")
-			}
-			params.AtlasCliPath = cliPath
-		}
-		data, err := inspect.Inspect(cmd.Context(), &params)
+		data, err := fetchData(cmd.Context())
 		if err != nil {
 			return err
 		}
@@ -67,4 +56,37 @@ func Execute() {
 
 func init() {
 	initFlags(rootCmd.Flags())
+}
+
+func fetchData(ctx context.Context) (*inspect.Data, error) {
+	if params.AtlasCliPath != "" {
+		err := verifyFileExists(params.AtlasCliPath)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		cliPath, err := exec.LookPath(atlasCli)
+		if err != nil {
+			return nil, fmt.Errorf("atlas cli not found in PATH")
+		}
+		params.AtlasCliPath = cliPath
+	}
+
+	if params.FromFilePath != "" {
+		err := verifyFileExists(params.FromFilePath)
+		if err != nil {
+			return nil, err
+		}
+		data, err := inspect.LoadFromFile(params.FromFilePath)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	}
+
+	data, err := inspect.Inspect(ctx, &params)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

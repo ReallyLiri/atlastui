@@ -5,18 +5,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 )
 
 const cobraErrorPrefix = "Error: "
 const jsonFormat = "json"
 
-type InspectParams struct {
+type Params struct {
 	atlasexec.SchemaInspectParams
+	FromFilePath string
 	AtlasCliPath string
 }
 
-func Inspect(ctx context.Context, params *InspectParams) (*Data, error) {
+func Inspect(ctx context.Context, params *Params) (*Data, error) {
 	atlasClient, err := atlasexec.NewClient("", params.AtlasCliPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create atlas client: %w", err)
@@ -30,10 +33,27 @@ func Inspect(ctx context.Context, params *InspectParams) (*Data, error) {
 		}
 		return nil, err
 	}
-	var data Data
-	err = json.Unmarshal([]byte(raw), &data)
+	return unmarshal([]byte(raw))
+}
+
+func LoadFromFile(fpath string) (*Data, error) {
+	f, err := os.Open(fpath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal schema: %w", err)
+		return nil, fmt.Errorf("failed to open file at '%s': %w", fpath, err)
+	}
+	defer f.Close()
+	raw, err := io.ReadAll(f)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file at '%s': %w", fpath, err)
+	}
+	return unmarshal(raw)
+}
+
+func unmarshal(raw []byte) (*Data, error) {
+	var data Data
+	err := json.Unmarshal(raw, &data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal data: %w", err)
 	}
 	return &data, nil
 }

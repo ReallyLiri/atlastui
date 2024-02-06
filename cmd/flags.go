@@ -32,6 +32,12 @@ func initFlags(set *pflag.FlagSet) {
 		nil,
 		"list of glob patterns used to filter resources from applying",
 	)
+	set.StringVarP(
+		&params.FromFilePath,
+		"file", "f",
+		"",
+		"optional path to a file containing the output of 'atlas schema inspect' command. Currently only supports JSON format",
+	)
 
 	set.StringVar(&params.Env, "env", "", "set which env from the config file to use")
 	set.StringVarP(&params.ConfigURL, "config", "c", "", "select config (project) file using URL format")
