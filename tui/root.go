@@ -21,30 +21,36 @@ type tableKey struct {
 	tableName  string
 }
 
-type rootModel struct {
-	// data
-	schemasByName         map[string]inspect.Schema
-	tablesBySchemaAndName map[tableKey]inspect.Table
-
-	// state
+type modelState struct {
 	selectedSchema string
 	selectedTable  string
 	tableSection   TableDetailsSection
 	quitting       bool
+	width          int
+	height         int
+}
 
-	// config
+type modelConfig struct {
 	title  string
 	keymap help.KeyMap
-	width  int
-	height int
+}
 
-	// view models
+type viewModels struct {
 	help         help.Model
 	tablesList   table.Model
 	tableDetails map[TableDetailsSection]table.Model
 }
 
-var _ tea.Model = &rootModel{}
+type model struct {
+	schemasByName         map[string]inspect.Schema
+	tablesBySchemaAndName map[tableKey]inspect.Table
+
+	state  modelState
+	config modelConfig
+	vms    viewModels
+}
+
+var _ tea.Model = &model{}
 
 func Run(ctx context.Context, title string, data inspect.Data) error {
 	m, err := newRootModel(title, data)
@@ -62,21 +68,27 @@ func Run(ctx context.Context, title string, data inspect.Data) error {
 	return nil
 }
 
-func newRootModel(title string, data inspect.Data) (*rootModel, error) {
+func newRootModel(title string, data inspect.Data) (*model, error) {
 	width, height, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get terminal size: %w", err)
 	}
 
-	m := &rootModel{
+	m := &model{
 		schemasByName:         make(map[string]inspect.Schema),
 		tablesBySchemaAndName: make(map[tableKey]inspect.Table),
-		keymap:                keymap.GetKeyMap(),
-		title:                 title,
-		help:                  help.New(),
-		tableSection:          ColumnsTable,
-		width:                 width,
-		height:                height,
+		state: modelState{
+			tableSection: ColumnsTable,
+			width:        width,
+			height:       height,
+		},
+		config: modelConfig{
+			keymap: keymap.GetKeyMap(),
+			title:  title,
+		},
+		vms: viewModels{
+			help: help.New(),
+		},
 	}
 
 	for _, schema := range data.Schemas {
@@ -94,50 +106,50 @@ func newRootModel(title string, data inspect.Data) (*rootModel, error) {
 	return m, nil
 }
 
-func (m *rootModel) onSchemaSelected(schema string) {
-	m.selectedSchema = schema
+func (m *model) onSchemaSelected(schema string) {
+	m.state.selectedSchema = schema
 	tablesListWidth, tablesListHeight := m.tablesListSize()
-	m.tablesList = newTablesList(lo.Map(m.schemasByName[m.selectedSchema].Tables, func(tbl inspect.Table, _ int) string {
+	m.vms.tablesList = newTablesList(lo.Map(m.schemasByName[m.state.selectedSchema].Tables, func(tbl inspect.Table, _ int) string {
 		return tbl.Name
 	}), tablesListWidth, tablesListHeight)
-	m.tableDetails = nil
+	m.vms.tableDetails = nil
 }
 
-func (m *rootModel) tablesListSize() (width, height int) {
-	return m.width * 1 / 3, m.height - 5
+func (m *model) tablesListSize() (width, height int) {
+	return m.state.width * 1 / 3, m.state.height - 5
 }
 
-func (m *rootModel) tableDetailsSize() (width, height int) {
-	return m.width * 2 / 3, m.height - 5
+func (m *model) tableDetailsSize() (width, height int) {
+	return m.state.width * 2 / 3, m.state.height - 5
 }
 
-func (m *rootModel) onTableSelected(table tableKey) {
+func (m *model) onTableSelected(table tableKey) {
 	t := m.tablesBySchemaAndName[table]
-	m.selectedTable = t.Name
+	m.state.selectedTable = t.Name
 	w, h := m.tableDetailsSize()
-	m.tableDetails = newTableDetails(t, w, h)
+	m.vms.tableDetails = newTableDetails(t, w, h)
 }
 
-func (m *rootModel) onResize(width, height int) {
-	m.width = width
-	m.height = height
+func (m *model) onResize(width, height int) {
+	m.state.width = width
+	m.state.height = height
 
 	tablesListWidth, tablesListHeight := m.tablesListSize()
-	m.tablesList.SetWidth(tablesListWidth)
-	m.tablesList.SetHeight(tablesListHeight)
+	m.vms.tablesList.SetWidth(tablesListWidth)
+	m.vms.tablesList.SetHeight(tablesListHeight)
 	tableDetailsWidth, tableDetailsHeight := m.tableDetailsSize()
 
-	for _, t := range m.tableDetails {
+	for _, t := range m.vms.tableDetails {
 		t.SetWidth(tableDetailsWidth)
 		t.SetHeight(tableDetailsHeight)
 	}
 }
 
-func (m *rootModel) Init() tea.Cmd {
+func (m *model) Init() tea.Cmd {
 	return nil
 }
 
-func (m *rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch tmsg := msg.(type) {
@@ -148,56 +160,56 @@ func (m *rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(tmsg, keymap.Left), key.Matches(tmsg, keymap.Right):
-			if m.tablesList.Focused() {
-				m.tablesList.Blur()
-				currSection := m.tableDetails[m.tableSection]
+			if m.vms.tablesList.Focused() {
+				m.vms.tablesList.Blur()
+				currSection := m.vms.tableDetails[m.state.tableSection]
 				currSection.Focus()
-				m.tableDetails[m.tableSection] = currSection
+				m.vms.tableDetails[m.state.tableSection] = currSection
 			} else {
-				m.tablesList.Focus()
-				currSection := m.tableDetails[m.tableSection]
+				m.vms.tablesList.Focus()
+				currSection := m.vms.tableDetails[m.state.tableSection]
 				currSection.Blur()
-				m.tableDetails[m.tableSection] = currSection
+				m.vms.tableDetails[m.state.tableSection] = currSection
 			}
 		case key.Matches(tmsg, keymap.Up), key.Matches(tmsg, keymap.Down):
-			if m.tablesList.Focused() {
-				m.tablesList, cmd = m.tablesList.Update(msg)
+			if m.vms.tablesList.Focused() {
+				m.vms.tablesList, cmd = m.vms.tablesList.Update(msg)
 				return m, cmd
 			}
-			if m.tableDetails[m.tableSection].Focused() {
-				m.tableDetails[m.tableSection], cmd = m.tableDetails[m.tableSection].Update(msg)
+			if m.vms.tableDetails[m.state.tableSection].Focused() {
+				m.vms.tableDetails[m.state.tableSection], cmd = m.vms.tableDetails[m.state.tableSection].Update(msg)
 				return m, cmd
 			}
 		case key.Matches(tmsg, keymap.Help):
-			m.help.ShowAll = !m.help.ShowAll
+			m.vms.help.ShowAll = !m.vms.help.ShowAll
 		case key.Matches(tmsg, keymap.Quit):
-			m.quitting = true
+			m.state.quitting = true
 			return m, tea.Quit
 		}
 	}
 	return m, nil
 }
 
-func (m *rootModel) View() string {
-	if m.quitting {
+func (m *model) View() string {
+	if m.state.quitting {
 		return ""
 	}
 
-	title := titleView(m.title, m.selectedSchema, m.selectedTable)
+	title := titleView(m.config.title, m.state.selectedSchema, m.state.selectedTable)
 	contents := []string{
 		title,
 		strings.Repeat("-", lipgloss.Width(title)),
 	}
-	if m.selectedSchema != "" {
-		if m.selectedTable != "" {
-			contents = append(contents, lipgloss.JoinHorizontal(lipgloss.Left, m.tablesList.View(), " ", m.tableDetails[m.tableSection].View()))
+	if m.state.selectedSchema != "" {
+		if m.state.selectedTable != "" {
+			contents = append(contents, lipgloss.JoinHorizontal(lipgloss.Left, m.vms.tablesList.View(), " ", m.vms.tableDetails[m.state.tableSection].View()))
 		} else {
-			contents = append(contents, m.tablesList.View())
+			contents = append(contents, m.vms.tablesList.View())
 		}
 	}
 	contents = append(contents,
 		strings.Repeat("-", lipgloss.Width(title)),
-		m.help.View(m.keymap),
+		m.vms.help.View(m.config.keymap),
 	)
 	return lipgloss.JoinVertical(lipgloss.Top, contents...)
 }
