@@ -27,13 +27,15 @@ type Index struct {
 	Parts  []IndexPart `json:"parts,omitempty"`
 }
 
+type ForeignKeyReferences struct {
+	Table   string   `json:"table"`
+	Columns []string `json:"columns,omitempty"`
+}
+
 type ForeignKey struct {
-	Name       string   `json:"name"`
-	Columns    []string `json:"columns,omitempty"`
-	References struct {
-		Table   string   `json:"table"`
-		Columns []string `json:"columns,omitempty"`
-	} `json:"references"`
+	Name       string               `json:"name"`
+	Columns    []string             `json:"columns,omitempty"`
+	References ForeignKeyReferences `json:"references"`
 }
 
 type Table struct {
@@ -51,6 +53,6 @@ type Schema struct {
 	Attrs
 }
 
-type Schemas struct {
+type Data struct {
 	Schemas []Schema `json:"schemas"`
 }

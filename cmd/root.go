@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/reallyliri/atlaspect/inspect"
+	"github.com/reallyliri/atlaspect/tui"
 	"github.com/samber/lo"
 	"os"
 	"os/exec"
@@ -48,12 +49,11 @@ This is a complimentary CLI tool for atlas, an "atlas schema inspect" on steroid
 			}
 			params.AtlasCliPath = cliPath
 		}
-		schemas, err := inspect.Inspect(cmd.Context(), &params)
+		data, err := inspect.Inspect(cmd.Context(), &params)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%v\n", schemas)
-		return nil
+		return tui.Run(cmd.Context(), *data)
 	},
 }
 
