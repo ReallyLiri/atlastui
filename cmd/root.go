@@ -32,9 +32,9 @@ var params inspect.Params
 var rootCmd = &cobra.Command{
 	Use:     toolName,
 	Version: version,
-	Short:   "Beautiful terminal UI for inspecting your database schemas",
-	Long: fmt.Sprintf(`Beautiful terminal UI for inspecting your database schemas.
-This is a complimentary CLI tool for atlas, an "atlas schema inspect" on steroids if you will.
+	Short:   "Textual User Interface for Atlas",
+	Long: fmt.Sprintf(`Beautiful terminal UI for database inspection and more.
+This is a complimentary CLI tool for "atlas".
 %s connects to the given database and visualize its schema.`, toolName),
 	Example:      strings.Join(lo.Map(examples, func(example string, _ int) string { return fmt.Sprintf("  %s %s", toolName, example) }), "\n"),
 	SilenceUsage: true,
