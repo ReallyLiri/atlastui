@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	whiteTint         = lipgloss.Color("#f0f0f0")
 	blueTint          = lipgloss.Color("#388de9")
 	greenTint         = lipgloss.Color("#46b17b")
 	borderFocusedTint = lipgloss.Color("63")

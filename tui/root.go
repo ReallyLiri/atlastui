@@ -2,6 +2,7 @@ package tui
 
 import (
 	"context"
+	_ "embed"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -14,6 +15,9 @@ import (
 	"github.com/samber/lo"
 	"strings"
 )
+
+//go:embed res/atlas.ans
+var atlas string
 
 /*
 To make the terminology a bit simpler, note "tbl" is a table tui component, "table" is a database table.
@@ -38,10 +42,11 @@ type modelState struct {
 	selectedSchema string
 	selectedTable  string
 	selectedTab    tableDetailsSection
+	focused        focusedComponent
 	quitting       bool
+	easteregg      bool
 	termWidth      int
 	termHeight     int
-	focused        focusedComponent
 }
 
 type modelConfig struct {
@@ -150,6 +155,10 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case spinner.TickMsg:
 		m.vms.globe, cmd = m.vms.globe.Update(msg)
 	case tea.KeyMsg:
+		if m.state.easteregg {
+			m.state.easteregg = !m.state.easteregg
+			break
+		}
 		switch {
 		case key.Matches(tmsg, keymap.Tab):
 			m.state.focused = (m.state.focused + 1) % 3
@@ -177,6 +186,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(tmsg, keymap.Quit):
 			m.state.quitting = true
 			return m, tea.Quit
+		case tmsg.String() == "a":
+			m.state.easteregg = !m.state.easteregg
 		}
 	}
 	return m, cmd
@@ -186,6 +197,14 @@ func (m *model) View() string {
 	if m.state.quitting || m.state.termWidth == 0 || m.state.termHeight == 0 {
 		return ""
 	}
+	if m.state.easteregg {
+		height := lipgloss.Height(atlas)
+		if height > m.state.termHeight {
+			atlas = strings.Join(strings.Split(atlas, "\n")[:m.state.termHeight], "\n")
+		}
+		return lipgloss.NewStyle().Width(m.state.termWidth).Height(m.state.termHeight).Align(lipgloss.Right).Background(whiteTint).Foreground(whiteTint).Render(atlas)
+	}
+
 	borderWidth, borderHeight := borderFocusedStyle.GetFrameSize()
 
 	title := titleView(m.config.title, m.state.selectedSchema, m.state.selectedTable, m.vms.globe)
