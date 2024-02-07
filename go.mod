@@ -7,11 +7,9 @@ require (
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.9.1
-	github.com/evertras/bubble-table v0.15.6
 	github.com/samber/lo v1.39.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
-	golang.org/x/term v0.6.0
 )
 
 require (
@@ -41,7 +39,10 @@ require (
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/term v0.6.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )
 
 replace ariga.io/atlas-go-sdk => github.com/reallyliri/atlas-go-sdk v0.0.0-20240205160716-f8f68bbe0caa
+
+replace github.com/charmbracelet/bubbles => github.com/reallyliri/bubbles v0.0.0-20240207125603-b3515aa1ed68

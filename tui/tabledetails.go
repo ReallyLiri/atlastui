@@ -16,12 +16,12 @@ const (
 	ForeignKeysTable
 )
 
-func newTblDetails(t inspect.Table, width, height int) (tbl.Model, tbl.Model, tbl.Model) {
+func newTblDetails(t inspect.Table) (tbl.Model, tbl.Model, tbl.Model) {
 	colsTbl := tbl.New(
 		tbl.WithColumns([]tbl.Column{
-			{Title: "Name", Width: width / 2},
-			{Title: "Type", Width: width / 3},
-			{Title: "Null", Width: width / 6},
+			{Title: "Name", Width: 3},
+			{Title: "Type", Width: 2},
+			{Title: "Null", Width: 1},
 		}),
 		tbl.WithRows(lo.Map(t.Columns, func(col inspect.Column, _ int) tbl.Row {
 			return tbl.Row{
@@ -30,16 +30,15 @@ func newTblDetails(t inspect.Table, width, height int) (tbl.Model, tbl.Model, tb
 				formatBool(col.Null),
 			}
 		})),
+		tbl.WithFlexColumnWidth(true),
 		tbl.WithFocused(true),
-		tbl.WithWidth(width),
-		tbl.WithHeight(height),
 	)
 
 	idxTbl := tbl.New(
 		tbl.WithColumns([]tbl.Column{
-			{Title: "Name", Width: 5 * width / 9},
-			{Title: "Unique", Width: width / 9},
-			{Title: "Parts", Width: 3 * width / 9},
+			{Title: "Name", Width: 5},
+			{Title: "Unique", Width: 1},
+			{Title: "Parts", Width: 3},
 		}),
 		tbl.WithRows(lo.Map(t.Indexes, func(idx inspect.Index, _ int) tbl.Row {
 			return tbl.Row{
@@ -50,15 +49,15 @@ func newTblDetails(t inspect.Table, width, height int) (tbl.Model, tbl.Model, tb
 				}), inlineListSeparator),
 			}
 		})),
-		tbl.WithWidth(width),
-		tbl.WithHeight(height),
+		tbl.WithFlexColumnWidth(true),
+		tbl.WithFocused(true),
 	)
 
 	fksTbl := tbl.New(
 		tbl.WithColumns([]tbl.Column{
-			{Title: "Name", Width: width / 2},
-			{Title: "Columns", Width: width / 4},
-			{Title: "References", Width: width / 4},
+			{Title: "Name", Width: 2},
+			{Title: "Columns", Width: 1},
+			{Title: "References", Width: 1},
 		}),
 		tbl.WithRows(lo.Map(t.ForeignKeys, func(fk inspect.ForeignKey, _ int) tbl.Row {
 			return tbl.Row{
@@ -67,8 +66,8 @@ func newTblDetails(t inspect.Table, width, height int) (tbl.Model, tbl.Model, tb
 				fmt.Sprintf("%s(%s)", fk.References.Table, strings.Join(fk.References.Columns, inlineListSeparator)),
 			}
 		})),
-		tbl.WithWidth(width),
-		tbl.WithHeight(height),
+		tbl.WithFlexColumnWidth(true),
+		tbl.WithFocused(true),
 	)
 
 	return colsTbl, idxTbl, fksTbl

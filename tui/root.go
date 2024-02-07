@@ -125,7 +125,7 @@ func (m *model) onSchemaSelected(schema string) {
 func (m *model) onTableSelected(key tableKey) {
 	m.state.selectedTable = key.tableName
 	m.state.selectedTab = ColumnsTable
-	m.vms.colsTbl, m.vms.idxTbl, m.vms.fksTbl = newTblDetails(m.tablesBySchemaAndName[key], 150, 0)
+	m.vms.colsTbl, m.vms.idxTbl, m.vms.fksTbl = newTblDetails(m.tablesBySchemaAndName[key])
 }
 
 func (m *model) Init() tea.Cmd {
