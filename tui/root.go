@@ -146,15 +146,17 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(tmsg, keymap.Left), key.Matches(tmsg, keymap.Right):
+		case key.Matches(tmsg, keymap.Tab):
 			m.state.focused = (m.state.focused + 1) % 3
-		case key.Matches(tmsg, keymap.Up), key.Matches(tmsg, keymap.Down):
+		case key.Matches(tmsg, keymap.Left), key.Matches(tmsg, keymap.Right), key.Matches(tmsg, keymap.Up), key.Matches(tmsg, keymap.Down):
 			switch m.state.focused {
 			case tablesListFocused:
 				m.vms.tablesList, cmd = m.vms.tablesList.Update(msg)
 				m.onTableSelected(tableKey{m.state.selectedSchema, m.vms.tablesList.SelectedItem().FilterValue()})
 			case detailsTabFocused:
-				m.state.selectedTab = (m.state.selectedTab + 1) % 3
+				if key.Matches(tmsg, keymap.Left) || key.Matches(tmsg, keymap.Right) {
+					m.state.selectedTab = (m.state.selectedTab + 1) % 3
+				}
 			case detailsContentsFocused:
 				switch m.state.selectedTab {
 				case ColumnsTable:
