@@ -20,6 +20,7 @@ const (
 )
 
 var examples = []string{
+	`-f schema.json`,
 	`-u "mysql://user:pass@localhost:3306/dbname"`,
 	`-u "mariadb://user:pass@localhost:3306/" --schema=schemaA,schemaB -s schemaC`,
 	`--url "postgres://user:pass@host:port/dbname?sslmode=disable"`,

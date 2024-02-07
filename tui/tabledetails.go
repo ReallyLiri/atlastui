@@ -25,7 +25,7 @@ func newTblDetails(t inspect.Table) (tbl.Model, tbl.Model, tbl.Model) {
 		}),
 		tbl.WithRows(lo.Map(t.Columns, func(col inspect.Column, _ int) tbl.Row {
 			return tbl.Row{
-				col.Name,
+				formatColumnName(t, col),
 				col.Type,
 				formatBool(col.Null),
 			}
@@ -71,4 +71,22 @@ func newTblDetails(t inspect.Table) (tbl.Model, tbl.Model, tbl.Model) {
 	)
 
 	return colsTbl, idxTbl, fksTbl
+}
+
+func formatColumnName(table inspect.Table, col inspect.Column) string {
+	sb := strings.Builder{}
+	if table.PrimaryKey != nil && lo.ContainsBy(table.PrimaryKey.Parts, func(part inspect.IndexPart) bool {
+		return part.Column == col.Name
+	}) {
+		sb.WriteString("🔑 ")
+	} else {
+		sb.WriteString("   ")
+	}
+	sb.WriteString(col.Name)
+	if lo.ContainsBy(table.ForeignKeys, func(fk inspect.ForeignKey) bool {
+		return lo.Contains(fk.Columns, col.Name)
+	}) {
+		sb.WriteString(" 🔗")
+	}
+	return sb.String()
 }

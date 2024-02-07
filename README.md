@@ -9,15 +9,14 @@ Pronounced "atla-stewie", `atlastui` is an atlas text user interface.
 - Handle non-tty terminals
 - Verify terminal resize
 - Verify Windows compatibility
-- Handle width overflows
+- Verify light terminal
+- Get rid of width alignment magic numbers (also in bubbles fork)
 
 ### Features
 
+- Set consistent color style
+- Add search in ui components
+- Link between tables/indexes etc
 - Support non-json formats (hcl, mermaid)
 - Support views, funcs, procedures.
 - Support multiple schemas
-
-### Run
-
--u "postgres://admin:1234@localhost:5432/import?sslmode=disable"
--f spec.json

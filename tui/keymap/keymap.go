@@ -24,8 +24,8 @@ var (
 		key.WithHelp("→/l", "move right"),
 	)
 	Tab = key.NewBinding(
-		key.WithKeys(tea.KeyTab.String()),
-		key.WithHelp("→/l", "change focus"),
+		key.WithKeys(tea.KeyTab.String(), "n"),
+		key.WithHelp("Tab/n", "change focus"),
 	)
 	Search = key.NewBinding(
 		key.WithKeys("/"),
@@ -57,7 +57,8 @@ func (k keyMap) ShortHelp() []key.Binding {
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{Tab},
-		{Up, Down, Left, Right},
+		{Up, Down},
+		{Left, Right},
 		{Help, Quit},
 	}
 }
