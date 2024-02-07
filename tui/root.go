@@ -2,32 +2,45 @@ package tui
 
 import (
 	"context"
-	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/bubbles/list"
+	tbl "github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/reallyliri/atlastui/inspect"
 	"github.com/reallyliri/atlastui/tui/keymap"
 	"github.com/samber/lo"
-	"golang.org/x/term"
-	"os"
 	"strings"
 )
+
+/*
+To make the terminology a bit simpler, note "tbl" is a table tui component, "table" is a database table.
+*/
+
+const maxWidth = 250
 
 type tableKey struct {
 	schemaName string
 	tableName  string
 }
 
+type focusedComponent int
+
+const (
+	tablesListFocused focusedComponent = iota
+	detailsTabFocused
+	detailsContentsFocused
+)
+
 type modelState struct {
 	selectedSchema string
 	selectedTable  string
-	tableSection   TableDetailsSection
+	selectedTab    tableDetailsSection
 	quitting       bool
-	width          int
-	height         int
+	termWidth      int
+	termHeight     int
+	focused        focusedComponent
 }
 
 type modelConfig struct {
@@ -36,9 +49,11 @@ type modelConfig struct {
 }
 
 type viewModels struct {
-	help         help.Model
-	tablesList   table.Model
-	tableDetails map[TableDetailsSection]table.Model
+	help       help.Model
+	tablesList list.Model
+	colsTbl    tbl.Model
+	idxTbl     tbl.Model
+	fksTbl     tbl.Model
 }
 
 type model struct {
@@ -69,18 +84,11 @@ func Run(ctx context.Context, title string, data inspect.Data) error {
 }
 
 func newRootModel(title string, data inspect.Data) (*model, error) {
-	width, height, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		return nil, fmt.Errorf("failed to get terminal size: %w", err)
-	}
-
 	m := &model{
 		schemasByName:         make(map[string]inspect.Schema),
 		tablesBySchemaAndName: make(map[tableKey]inspect.Table),
 		state: modelState{
-			tableSection: ColumnsTable,
-			width:        width,
-			height:       height,
+			selectedTab: ColumnsTable,
 		},
 		config: modelConfig{
 			keymap: keymap.GetKeyMap(),
@@ -108,41 +116,16 @@ func newRootModel(title string, data inspect.Data) (*model, error) {
 
 func (m *model) onSchemaSelected(schema string) {
 	m.state.selectedSchema = schema
-	tablesListWidth, tablesListHeight := m.tablesListSize()
 	m.vms.tablesList = newTablesList(lo.Map(m.schemasByName[m.state.selectedSchema].Tables, func(tbl inspect.Table, _ int) string {
 		return tbl.Name
-	}), tablesListWidth, tablesListHeight)
-	m.vms.tableDetails = nil
+	}))
+	m.state.selectedTable = ""
 }
 
-func (m *model) tablesListSize() (width, height int) {
-	return m.state.width * 1 / 3, m.state.height - 5
-}
-
-func (m *model) tableDetailsSize() (width, height int) {
-	return m.state.width * 2 / 3, m.state.height - 5
-}
-
-func (m *model) onTableSelected(table tableKey) {
-	t := m.tablesBySchemaAndName[table]
-	m.state.selectedTable = t.Name
-	w, h := m.tableDetailsSize()
-	m.vms.tableDetails = newTableDetails(t, w, h)
-}
-
-func (m *model) onResize(width, height int) {
-	m.state.width = width
-	m.state.height = height
-
-	tablesListWidth, tablesListHeight := m.tablesListSize()
-	m.vms.tablesList.SetWidth(tablesListWidth)
-	m.vms.tablesList.SetHeight(tablesListHeight)
-	tableDetailsWidth, tableDetailsHeight := m.tableDetailsSize()
-
-	for _, t := range m.vms.tableDetails {
-		t.SetWidth(tableDetailsWidth)
-		t.SetHeight(tableDetailsHeight)
-	}
+func (m *model) onTableSelected(key tableKey) {
+	m.state.selectedTable = key.tableName
+	m.state.selectedTab = ColumnsTable
+	m.vms.colsTbl, m.vms.idxTbl, m.vms.fksTbl = newTblDetails(m.tablesBySchemaAndName[key], 150, 0)
 }
 
 func (m *model) Init() tea.Cmd {
@@ -155,30 +138,32 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch tmsg := msg.(type) {
 	case tea.WindowSizeMsg:
 		if tmsg.Width > 0 && tmsg.Height > 0 {
-			m.onResize(tmsg.Width, tmsg.Height)
+			m.state.termWidth = tmsg.Width
+			if m.state.termWidth > maxWidth {
+				m.state.termWidth = maxWidth
+			}
+			m.state.termHeight = tmsg.Height
 		}
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(tmsg, keymap.Left), key.Matches(tmsg, keymap.Right):
-			if m.vms.tablesList.Focused() {
-				m.vms.tablesList.Blur()
-				currSection := m.vms.tableDetails[m.state.tableSection]
-				currSection.Focus()
-				m.vms.tableDetails[m.state.tableSection] = currSection
-			} else {
-				m.vms.tablesList.Focus()
-				currSection := m.vms.tableDetails[m.state.tableSection]
-				currSection.Blur()
-				m.vms.tableDetails[m.state.tableSection] = currSection
-			}
+			m.state.focused = (m.state.focused + 1) % 3
 		case key.Matches(tmsg, keymap.Up), key.Matches(tmsg, keymap.Down):
-			if m.vms.tablesList.Focused() {
+			switch m.state.focused {
+			case tablesListFocused:
 				m.vms.tablesList, cmd = m.vms.tablesList.Update(msg)
-				return m, cmd
-			}
-			if m.vms.tableDetails[m.state.tableSection].Focused() {
-				m.vms.tableDetails[m.state.tableSection], cmd = m.vms.tableDetails[m.state.tableSection].Update(msg)
-				return m, cmd
+				m.onTableSelected(tableKey{m.state.selectedSchema, m.vms.tablesList.SelectedItem().FilterValue()})
+			case detailsTabFocused:
+				m.state.selectedTab = (m.state.selectedTab + 1) % 3
+			case detailsContentsFocused:
+				switch m.state.selectedTab {
+				case ColumnsTable:
+					m.vms.colsTbl, cmd = m.vms.colsTbl.Update(msg)
+				case IndexesTable:
+					m.vms.idxTbl, cmd = m.vms.idxTbl.Update(msg)
+				case ForeignKeysTable:
+					m.vms.fksTbl, cmd = m.vms.fksTbl.Update(msg)
+				}
 			}
 		case key.Matches(tmsg, keymap.Help):
 			m.vms.help.ShowAll = !m.vms.help.ShowAll
@@ -187,29 +172,83 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
-	return m, nil
+	return m, cmd
 }
 
 func (m *model) View() string {
 	if m.state.quitting {
 		return ""
 	}
+	borderWidth, borderHeight := borderFocusedStyle.GetFrameSize()
 
 	title := titleView(m.config.title, m.state.selectedSchema, m.state.selectedTable)
-	contents := []string{
-		title,
-		strings.Repeat("-", lipgloss.Width(title)),
-	}
+	footer := m.vms.help.View(m.config.keymap)
+	centerHeight := m.state.termHeight - lipgloss.Height(title) - lipgloss.Height(footer) - 5
+
+	var tablesList string
+	var tabsView string
+	var details string
+
 	if m.state.selectedSchema != "" {
+		m.vms.tablesList.SetSize(m.state.termWidth/3-borderWidth, centerHeight-borderHeight+3)
+		tablesList = withBorder(m.vms.tablesList.View(), m.state.focused == tablesListFocused)
+
 		if m.state.selectedTable != "" {
-			contents = append(contents, lipgloss.JoinHorizontal(lipgloss.Left, m.vms.tablesList.View(), " ", m.vms.tableDetails[m.state.tableSection].View()))
-		} else {
-			contents = append(contents, m.vms.tablesList.View())
+			detailsWidth := (m.state.termWidth*2)/3 - borderWidth
+			tabsView = m.tabsView(detailsWidth, m.state.focused == detailsTabFocused)
+
+			var currTbl tbl.Model
+			switch m.state.selectedTab {
+			case ColumnsTable:
+				currTbl = m.vms.colsTbl
+			case IndexesTable:
+				currTbl = m.vms.idxTbl
+			case ForeignKeysTable:
+				currTbl = m.vms.fksTbl
+			}
+			currTbl.SetWidth(detailsWidth)
+			currTbl.SetHeight(centerHeight - lipgloss.Height(tabsView) - borderHeight + 2)
+			details = withBorder(currTbl.View(), m.state.focused == detailsContentsFocused)
 		}
 	}
-	contents = append(contents,
-		strings.Repeat("-", lipgloss.Width(title)),
-		m.vms.help.View(m.config.keymap),
+
+	return lipgloss.JoinVertical(
+		lipgloss.Top,
+		title,
+		lipgloss.JoinHorizontal(
+			lipgloss.Left,
+			tablesList,
+			lipgloss.JoinVertical(
+				lipgloss.Top,
+				tabsView, details,
+			),
+		),
+		footer,
 	)
-	return lipgloss.JoinVertical(lipgloss.Top, contents...)
+}
+
+func (m *model) tabsView(width int, focused bool) string {
+	tabs := []string{
+		tabView("Columns", m.state.selectedTab == ColumnsTable),
+		tabView("Indexes", m.state.selectedTab == IndexesTable),
+		tabView("Foreign Keys", m.state.selectedTab == ForeignKeysTable),
+	}
+
+	row := lipgloss.NewStyle().
+		Width(width).
+		Align(lipgloss.Center).
+		Render(strings.Join(tabs, subTitleStyle.Render(" · ")))
+	return withBorder(row, focused)
+}
+
+func tabView(title string, selected bool) string {
+	return lo.Ternary(selected, titleStyle.Render(title), subTitleStyle.Render(title))
+}
+
+func withBorder(ui string, focused bool) string {
+	if focused {
+		return borderFocusedStyle.Render(ui)
+	} else {
+		return borderBluredStyle.Render(ui)
+	}
 }

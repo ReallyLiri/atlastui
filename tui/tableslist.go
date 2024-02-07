@@ -1,21 +1,43 @@
 package tui
 
 import (
-	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/samber/lo"
 )
 
-func newTablesList(names []string, width, height int) table.Model {
-	return table.New(
-		table.WithColumns([]table.Column{
-			{Title: "Name", Width: width},
+type tablesListItem string
+
+var _ list.DefaultItem = tablesListItem("")
+
+func (t tablesListItem) FilterValue() string {
+	return string(t)
+}
+
+func (t tablesListItem) Title() string {
+	return string(t)
+}
+
+func (t tablesListItem) Description() string {
+	return ""
+}
+
+func newTablesList(names []string) list.Model {
+	delegate := list.NewDefaultDelegate()
+	delegate.ShowDescription = false
+	delegate.SetHeight(1)
+	delegate.SetSpacing(0)
+	lst := list.New(
+		lo.Map(names, func(name string, _ int) list.Item {
+			return tablesListItem(name)
 		}),
-		table.WithRows(lo.Map(names, func(name string, _ int) table.Row {
-			return table.Row{
-				name,
-			}
-		})),
-		table.WithWidth(width),
-		table.WithHeight(height),
+		delegate,
+		0,
+		0,
 	)
+	lst.SetFilteringEnabled(false)
+	lst.SetShowHelp(false)
+	lst.SetShowTitle(false)
+	lst.SetStatusBarItemName("table", "tables")
+	lst.SetShowPagination(false)
+	return lst
 }

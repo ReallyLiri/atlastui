@@ -7,8 +7,10 @@ import (
 )
 
 const (
-	blueTint  = lipgloss.Color("#388de9")
-	greenTint = lipgloss.Color("#46b17b")
+	blueTint          = lipgloss.Color("#388de9")
+	greenTint         = lipgloss.Color("#46b17b")
+	borderFocusedTint = lipgloss.Color("63")
+	borderBluredTint  = lipgloss.Color("240")
 )
 
 const (
@@ -17,9 +19,16 @@ const (
 )
 
 var (
+	subTitleTint = help.New().Styles.ShortKey.GetForeground()
+
 	titleStyle              = lipgloss.NewStyle().Foreground(blueTint)
-	breadcrumbsSectionStyle = help.New().Styles.ShortKey
+	subTitleStyle           = lipgloss.NewStyle().Foreground(subTitleTint)
+	breadcrumbsSectionStyle = subTitleStyle
 	breadcrumbsTitleStyle   = lipgloss.NewStyle().Foreground(greenTint)
+	borderFocusedStyle      = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderForeground(borderFocusedTint)
+	borderBluredStyle       = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderForeground(borderBluredTint)
+	alignLeftStyle          = lipgloss.NewStyle().Align(lipgloss.Left)
+	boldStyle               = lipgloss.NewStyle().Bold(true)
 )
 
 func formatBool(b bool) string {
