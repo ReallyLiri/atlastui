@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/spinner"
 	tbl "github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -54,6 +55,7 @@ type viewModels struct {
 	colsTbl    tbl.Model
 	idxTbl     tbl.Model
 	fksTbl     tbl.Model
+	globe      spinner.Model
 }
 
 type model struct {
@@ -95,7 +97,8 @@ func newRootModel(title string, data inspect.Data) (*model, error) {
 			title:  title,
 		},
 		vms: viewModels{
-			help: help.New(),
+			help:  help.New(),
+			globe: spinner.New(spinner.WithSpinner(spinner.Globe)),
 		},
 	}
 
@@ -129,7 +132,7 @@ func (m *model) onTableSelected(key tableKey) {
 }
 
 func (m *model) Init() tea.Cmd {
-	return nil
+	return m.vms.globe.Tick
 }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -144,6 +147,8 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.state.termHeight = tmsg.Height
 		}
+	case spinner.TickMsg:
+		m.vms.globe, cmd = m.vms.globe.Update(msg)
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(tmsg, keymap.Tab):
@@ -178,12 +183,12 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *model) View() string {
-	if m.state.quitting {
+	if m.state.quitting || m.state.termWidth == 0 || m.state.termHeight == 0 {
 		return ""
 	}
 	borderWidth, borderHeight := borderFocusedStyle.GetFrameSize()
 
-	title := titleView(m.config.title, m.state.selectedSchema, m.state.selectedTable)
+	title := titleView(m.config.title, m.state.selectedSchema, m.state.selectedTable, m.vms.globe)
 	footer := m.vms.help.View(m.config.keymap)
 	centerHeight := m.state.termHeight - lipgloss.Height(title) - lipgloss.Height(footer) - 5
 
