@@ -2,7 +2,7 @@ package tui
 
 import (
 	"fmt"
-	tbl "github.com/charmbracelet/bubbles/table"
+	chart "github.com/charmbracelet/bubbles/table"
 	"github.com/reallyliri/atlastui/inspect"
 	"github.com/samber/lo"
 	"strings"
@@ -16,32 +16,45 @@ const (
 	ForeignKeysTable
 )
 
-func newTblDetails(t inspect.Table) (tbl.Model, tbl.Model, tbl.Model) {
-	colsTbl := tbl.New(
-		tbl.WithColumns([]tbl.Column{
+func (section tableDetailsSection) title() string {
+	switch section {
+	case ColumnsTable:
+		return "Columns"
+	case IndexesTable:
+		return "Indexes"
+	case ForeignKeysTable:
+		return "Foreign Keys"
+	default:
+		panic("unknown table details section")
+	}
+}
+
+func newTblDetails(t inspect.Table) (chart.Model, chart.Model, chart.Model) {
+	colsTbl := chart.New(
+		chart.WithColumns([]chart.Column{
 			{Title: "Name", Width: 3},
 			{Title: "Type", Width: 2},
 			{Title: "Null", Width: 1},
 		}),
-		tbl.WithRows(lo.Map(t.Columns, func(col inspect.Column, _ int) tbl.Row {
-			return tbl.Row{
+		chart.WithRows(lo.Map(t.Columns, func(col inspect.Column, _ int) chart.Row {
+			return chart.Row{
 				formatColumnName(t, col),
 				col.Type,
 				formatBool(col.Null),
 			}
 		})),
-		tbl.WithFlexColumnWidth(true),
-		tbl.WithFocused(true),
+		chart.WithFlexColumnWidth(true),
+		chart.WithFocused(true),
 	)
 
-	idxTbl := tbl.New(
-		tbl.WithColumns([]tbl.Column{
+	idxTbl := chart.New(
+		chart.WithColumns([]chart.Column{
 			{Title: "Name", Width: 5},
 			{Title: "Unique", Width: 1},
 			{Title: "Parts", Width: 3},
 		}),
-		tbl.WithRows(lo.Map(t.Indexes, func(idx inspect.Index, _ int) tbl.Row {
-			return tbl.Row{
+		chart.WithRows(lo.Map(t.Indexes, func(idx inspect.Index, _ int) chart.Row {
+			return chart.Row{
 				idx.Name,
 				formatBool(idx.Unique),
 				strings.Join(lo.Map(idx.Parts, func(part inspect.IndexPart, _ int) string {
@@ -49,25 +62,25 @@ func newTblDetails(t inspect.Table) (tbl.Model, tbl.Model, tbl.Model) {
 				}), inlineListSeparator),
 			}
 		})),
-		tbl.WithFlexColumnWidth(true),
-		tbl.WithFocused(true),
+		chart.WithFlexColumnWidth(true),
+		chart.WithFocused(true),
 	)
 
-	fksTbl := tbl.New(
-		tbl.WithColumns([]tbl.Column{
+	fksTbl := chart.New(
+		chart.WithColumns([]chart.Column{
 			{Title: "Name", Width: 2},
 			{Title: "Columns", Width: 1},
 			{Title: "References", Width: 1},
 		}),
-		tbl.WithRows(lo.Map(t.ForeignKeys, func(fk inspect.ForeignKey, _ int) tbl.Row {
-			return tbl.Row{
+		chart.WithRows(lo.Map(t.ForeignKeys, func(fk inspect.ForeignKey, _ int) chart.Row {
+			return chart.Row{
 				fk.Name,
 				strings.Join(fk.Columns, inlineListSeparator),
 				fmt.Sprintf("%s(%s)", fk.References.Table, strings.Join(fk.References.Columns, inlineListSeparator)),
 			}
 		})),
-		tbl.WithFlexColumnWidth(true),
-		tbl.WithFocused(true),
+		chart.WithFlexColumnWidth(true),
+		chart.WithFocused(true),
 	)
 
 	return colsTbl, idxTbl, fksTbl

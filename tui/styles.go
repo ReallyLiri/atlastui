@@ -28,8 +28,7 @@ var (
 	breadcrumbsTitleStyle   = lipgloss.NewStyle().Foreground(greenTint)
 	borderFocusedStyle      = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderForeground(borderFocusedTint)
 	borderBluredStyle       = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderForeground(borderBluredTint)
-	alignLeftStyle          = lipgloss.NewStyle().Align(lipgloss.Left)
-	boldStyle               = lipgloss.NewStyle().Bold(true)
+	noDataStyle             = lipgloss.NewStyle().Foreground(subTitleTint).AlignHorizontal(lipgloss.Center).Padding(2)
 )
 
 func formatBool(b bool) string {

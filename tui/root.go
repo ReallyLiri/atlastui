@@ -3,11 +3,12 @@ package tui
 import (
 	"context"
 	_ "embed"
+	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
-	tbl "github.com/charmbracelet/bubbles/table"
+	chart "github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/reallyliri/atlastui/inspect"
@@ -16,12 +17,14 @@ import (
 	"strings"
 )
 
+/*
+--- NOTE ---
+To make the terminology a bit simpler, note "chart" is a table tui component while "table" is a database table.
+--- NOTE ---
+*/
+
 //go:embed res/atlas.ans
 var atlas string
-
-/*
-To make the terminology a bit simpler, note "tbl" is a table tui component, "table" is a database table.
-*/
 
 const maxWidth = 250
 
@@ -57,9 +60,9 @@ type modelConfig struct {
 type viewModels struct {
 	help       help.Model
 	tablesList list.Model
-	colsTbl    tbl.Model
-	idxTbl     tbl.Model
-	fksTbl     tbl.Model
+	colsTbl    chart.Model
+	idxTbl     chart.Model
+	fksTbl     chart.Model
 	globe      spinner.Model
 }
 
@@ -124,8 +127,8 @@ func newRootModel(title string, data inspect.Data) (*model, error) {
 
 func (m *model) onSchemaSelected(schema string) {
 	m.state.selectedSchema = schema
-	m.vms.tablesList = newTablesList(lo.Map(m.schemasByName[m.state.selectedSchema].Tables, func(tbl inspect.Table, _ int) string {
-		return tbl.Name
+	m.vms.tablesList = newTablesList(lo.Map(m.schemasByName[m.state.selectedSchema].Tables, func(chart inspect.Table, _ int) string {
+		return chart.Name
 	}))
 	m.state.selectedTable = ""
 }
@@ -223,7 +226,7 @@ func (m *model) View() string {
 			detailsWidth := (m.state.termWidth*2)/3 - borderWidth
 			tabsView = m.tabsView(detailsWidth, m.state.focused == detailsTabFocused)
 
-			var currTbl tbl.Model
+			var currTbl chart.Model
 			switch m.state.selectedTab {
 			case ColumnsTable:
 				currTbl = m.vms.colsTbl
@@ -234,7 +237,15 @@ func (m *model) View() string {
 			}
 			currTbl.SetWidth(detailsWidth)
 			currTbl.SetHeight(centerHeight - lipgloss.Height(tabsView) - borderHeight + 2)
-			details = withBorder(currTbl.View(), m.state.focused == detailsContentsFocused)
+			if len(currTbl.Rows()) == 0 {
+				noData := fmt.Sprintf("No %s", m.state.selectedTab.title())
+				details = withBorder(noDataStyle.Copy().
+					Width(currTbl.Width()).
+					Height(currTbl.Height()+1).
+					Render(noData), m.state.focused == detailsContentsFocused)
+			} else {
+				details = withBorder(currTbl.View(), m.state.focused == detailsContentsFocused)
+			}
 		}
 	}
 
@@ -255,9 +266,9 @@ func (m *model) View() string {
 
 func (m *model) tabsView(width int, focused bool) string {
 	tabs := []string{
-		tabView("Columns", m.state.selectedTab == ColumnsTable),
-		tabView("Indexes", m.state.selectedTab == IndexesTable),
-		tabView("Foreign Keys", m.state.selectedTab == ForeignKeysTable),
+		tabView(ColumnsTable.title(), m.state.selectedTab == ColumnsTable),
+		tabView(IndexesTable.title(), m.state.selectedTab == IndexesTable),
+		tabView(ForeignKeysTable.title(), m.state.selectedTab == ForeignKeysTable),
 	}
 
 	row := lipgloss.NewStyle().
