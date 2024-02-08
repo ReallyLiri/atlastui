@@ -1,6 +1,14 @@
 # AtlasTUI
 
-Pronounced "atla-stewie", `atlastui` is an atlas text user interface.
+Pronounced "atla-stewie", `atlastui` is an [atlas](https://atlasgo.io/) text user interface.
+
+![demo](demo.gif)
+
+## Installation
+
+```sh
+go install github.com/akosmarton/atlastui@latest
+```
 
 ## TODO
 
