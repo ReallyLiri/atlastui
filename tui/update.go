@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/reallyliri/atlastui/tui/keymap"
+	"github.com/reallyliri/atlastui/tui/types"
 )
 
 const maxWidth = 250
@@ -33,20 +34,20 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.state.focused = (m.state.focused + 1) % 3
 		case key.Matches(tmsg, keymap.Left), key.Matches(tmsg, keymap.Right), key.Matches(tmsg, keymap.Up), key.Matches(tmsg, keymap.Down):
 			switch m.state.focused {
-			case tablesListFocused:
+			case types.TablesListFocused:
 				m.vms.tablesList, cmd = m.vms.tablesList.Update(msg)
 				m.onTableSelected(tableKey{m.state.selectedSchema, m.vms.tablesList.SelectedItem().FilterValue()})
-			case detailsTabFocused:
+			case types.DetailsTabFocused:
 				if key.Matches(tmsg, keymap.Left) || key.Matches(tmsg, keymap.Right) {
 					m.state.selectedTab = (m.state.selectedTab + 1) % 3
 				}
-			case detailsContentsFocused:
+			case types.DetailsContentsFocused:
 				switch m.state.selectedTab {
-				case ColumnsTable:
+				case types.ColumnsTable:
 					m.vms.colsChart, cmd = m.vms.colsChart.Update(msg)
-				case IndexesTable:
+				case types.IndexesTable:
 					m.vms.idxChart, cmd = m.vms.idxChart.Update(msg)
-				case ForeignKeysTable:
+				case types.ForeignKeysTable:
 					m.vms.fksChart, cmd = m.vms.fksChart.Update(msg)
 				}
 			}

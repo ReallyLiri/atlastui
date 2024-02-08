@@ -9,7 +9,9 @@ import (
 	chart "github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/reallyliri/atlastui/inspect"
+	"github.com/reallyliri/atlastui/tui/format"
 	"github.com/reallyliri/atlastui/tui/keymap"
+	"github.com/reallyliri/atlastui/tui/types"
 	"github.com/samber/lo"
 	"strings"
 )
@@ -28,8 +30,8 @@ type tableKey struct {
 type modelState struct {
 	selectedSchema string
 	selectedTable  string
-	selectedTab    tableDetailsSection
-	focused        focusedComponent
+	selectedTab    types.TableDetailsSection
+	focused        types.FocusedComponent
 	quitting       bool
 	easteregg      bool
 	termWidth      int
@@ -86,7 +88,7 @@ func newRootModel(title string, data inspect.Data) (*model, error) {
 		schemasByName:         make(map[string]inspect.Schema),
 		tablesBySchemaAndName: make(map[tableKey]inspect.Table),
 		state: modelState{
-			selectedTab: ColumnsTable,
+			selectedTab: types.ColumnsTable,
 		},
 		config: modelConfig{
 			keymap: keymap.GetKeyMap(),
@@ -123,7 +125,7 @@ func (m *model) onSchemaSelected(schema string) {
 
 func (m *model) onTableSelected(key tableKey) {
 	m.state.selectedTable = key.tableName
-	m.state.selectedTab = ColumnsTable
+	m.state.selectedTab = types.ColumnsTable
 	m.vms.colsChart, m.vms.idxChart, m.vms.fksChart = newCharts(m.tablesBySchemaAndName[key])
 }
 
@@ -136,9 +138,9 @@ func newCharts(t inspect.Table) (colsChart chart.Model, idxChart chart.Model, fk
 		},
 		lo.Map(t.Columns, func(col inspect.Column, _ int) chart.Row {
 			return chart.Row{
-				formatColumnName(t, col),
+				format.ColumnName(t, col),
 				col.Type,
-				formatBool(col.Null),
+				format.Bool(col.Null),
 			}
 		}))
 
@@ -151,10 +153,10 @@ func newCharts(t inspect.Table) (colsChart chart.Model, idxChart chart.Model, fk
 		lo.Map(t.Indexes, func(idx inspect.Index, _ int) chart.Row {
 			return chart.Row{
 				idx.Name,
-				formatBool(idx.Unique),
+				format.Bool(idx.Unique),
 				strings.Join(lo.Map(idx.Parts, func(part inspect.IndexPart, _ int) string {
 					return part.Column
-				}), inlineListSeparator),
+				}), format.InlineListSeparator),
 			}
 		}))
 
@@ -167,8 +169,8 @@ func newCharts(t inspect.Table) (colsChart chart.Model, idxChart chart.Model, fk
 		lo.Map(t.ForeignKeys, func(fk inspect.ForeignKey, _ int) chart.Row {
 			return chart.Row{
 				fk.Name,
-				strings.Join(fk.Columns, inlineListSeparator),
-				fmt.Sprintf("%s(%s)", fk.References.Table, strings.Join(fk.References.Columns, inlineListSeparator)),
+				strings.Join(fk.Columns, format.InlineListSeparator),
+				fmt.Sprintf("%s(%s)", fk.References.Table, strings.Join(fk.References.Columns, format.InlineListSeparator)),
 			}
 		}))
 	return
@@ -190,7 +192,7 @@ func newTablesList(names []string) list.Model {
 	delegate.SetSpacing(0)
 	lst := list.New(
 		lo.Map(names, func(name string, _ int) list.Item {
-			return tablesListItem(name)
+			return types.TablesListItem(name)
 		}),
 		delegate,
 		0,

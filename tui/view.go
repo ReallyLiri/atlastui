@@ -6,6 +6,9 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	chart "github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/reallyliri/atlastui/tui/format"
+	"github.com/reallyliri/atlastui/tui/styles"
+	"github.com/reallyliri/atlastui/tui/types"
 	"github.com/samber/lo"
 	"strings"
 )
@@ -22,10 +25,10 @@ func (m *model) View() string {
 		if height > m.state.termHeight {
 			atlas = strings.Join(strings.Split(atlas, "\n")[:m.state.termHeight], "\n")
 		}
-		return lipgloss.NewStyle().Width(m.state.termWidth).Height(m.state.termHeight).Align(lipgloss.Right).Background(whiteTint).Foreground(whiteTint).Render(atlas)
+		return lipgloss.NewStyle().Width(m.state.termWidth).Height(m.state.termHeight).Align(lipgloss.Right).Background(styles.WhiteTint).Foreground(styles.WhiteTint).Render(atlas)
 	}
 
-	borderWidth, borderHeight := borderFocusedStyle.GetFrameSize()
+	borderWidth, borderHeight := styles.BorderFocusedStyle.GetFrameSize()
 
 	title := titleView(m.config.title, m.state.selectedSchema, m.state.selectedTable, m.vms.globe)
 	footer := m.vms.help.View(m.config.keymap)
@@ -37,31 +40,31 @@ func (m *model) View() string {
 
 	if m.state.selectedSchema != "" {
 		m.vms.tablesList.SetSize(m.state.termWidth/3-borderWidth, centerHeight-borderHeight+3)
-		tablesList = withBorder(m.vms.tablesList.View(), m.state.focused == tablesListFocused)
+		tablesList = withBorder(m.vms.tablesList.View(), m.state.focused == types.TablesListFocused)
 
 		if m.state.selectedTable != "" {
 			detailsWidth := (m.state.termWidth*2)/3 - borderWidth
-			tabsView = m.tabsView(detailsWidth, m.state.focused == detailsTabFocused)
+			tabsView = m.tabsView(detailsWidth, m.state.focused == types.DetailsTabFocused)
 
 			var currTbl chart.Model
 			switch m.state.selectedTab {
-			case ColumnsTable:
+			case types.ColumnsTable:
 				currTbl = m.vms.colsChart
-			case IndexesTable:
+			case types.IndexesTable:
 				currTbl = m.vms.idxChart
-			case ForeignKeysTable:
+			case types.ForeignKeysTable:
 				currTbl = m.vms.fksChart
 			}
 			currTbl.SetWidth(detailsWidth)
 			currTbl.SetHeight(centerHeight - lipgloss.Height(tabsView) - borderHeight + 2)
 			if len(currTbl.Rows()) == 0 {
-				noData := fmt.Sprintf("No %s", m.state.selectedTab.title())
-				details = withBorder(noDataStyle.Copy().
+				noData := fmt.Sprintf("No %s", m.state.selectedTab.Title())
+				details = withBorder(styles.NoDataStyle.Copy().
 					Width(currTbl.Width()).
 					Height(currTbl.Height()+1).
-					Render(noData), m.state.focused == detailsContentsFocused)
+					Render(noData), m.state.focused == types.DetailsContentsFocused)
 			} else {
-				details = withBorder(currTbl.View(), m.state.focused == detailsContentsFocused)
+				details = withBorder(currTbl.View(), m.state.focused == types.DetailsContentsFocused)
 			}
 		}
 	}
@@ -83,43 +86,43 @@ func (m *model) View() string {
 
 func (m *model) tabsView(width int, focused bool) string {
 	tabs := []string{
-		tabView(ColumnsTable.title(), m.state.selectedTab == ColumnsTable),
-		tabView(IndexesTable.title(), m.state.selectedTab == IndexesTable),
-		tabView(ForeignKeysTable.title(), m.state.selectedTab == ForeignKeysTable),
+		tabView(types.ColumnsTable.Title(), m.state.selectedTab == types.ColumnsTable),
+		tabView(types.IndexesTable.Title(), m.state.selectedTab == types.IndexesTable),
+		tabView(types.ForeignKeysTable.Title(), m.state.selectedTab == types.ForeignKeysTable),
 	}
 
 	row := lipgloss.NewStyle().
 		Width(width).
 		Align(lipgloss.Center).
-		Render(strings.Join(tabs, subTitleStyle.Render(tabsSeparator)))
+		Render(strings.Join(tabs, styles.SubTitleStyle.Render(format.TabsSeparator)))
 	return withBorder(row, focused)
 }
 
 func tabView(title string, selected bool) string {
-	return lo.Ternary(selected, titleStyle.Render(title), subTitleStyle.Render(title))
+	return lo.Ternary(selected, styles.TitleStyle.Render(title), styles.SubTitleStyle.Render(title))
 }
 
 func titleView(title, selectedSchema, selectedTable string, globe spinner.Model) string {
 	parts := make([]string, 0, 8)
-	parts = append(parts, titleStyle.Render(title))
+	parts = append(parts, styles.TitleStyle.Render(title))
 	parts = append(parts, " ")
 	parts = append(parts, globe.View())
 	if selectedSchema != "" {
-		parts = append(parts, breadcrumbsSectionStyle.Render(" ", breadcrumbsSeparator, " schema "))
-		parts = append(parts, breadcrumbsTitleStyle.Render(selectedSchema))
+		parts = append(parts, styles.BreadcrumbsSectionStyle.Render(" ", format.BreadcrumbsSeparator, " schema "))
+		parts = append(parts, styles.BreadcrumbsTitleStyle.Render(selectedSchema))
 	}
 	if selectedTable != "" {
-		parts = append(parts, breadcrumbsSectionStyle.Render(" ", breadcrumbsSeparator, " table "))
-		parts = append(parts, breadcrumbsTitleStyle.Render(selectedTable))
+		parts = append(parts, styles.BreadcrumbsSectionStyle.Render(" ", format.BreadcrumbsSeparator, " table "))
+		parts = append(parts, styles.BreadcrumbsTitleStyle.Render(selectedTable))
 	}
-	parts = append(parts, breadcrumbsSectionStyle.Render(" ", breadcrumbsSeparator))
+	parts = append(parts, styles.BreadcrumbsSectionStyle.Render(" ", format.BreadcrumbsSeparator))
 	return lipgloss.JoinHorizontal(lipgloss.Center, parts...)
 }
 
 func withBorder(ui string, focused bool) string {
 	if focused {
-		return borderFocusedStyle.Render(ui)
+		return styles.BorderFocusedStyle.Render(ui)
 	} else {
-		return borderBluredStyle.Render(ui)
+		return styles.BorderBluredStyle.Render(ui)
 	}
 }

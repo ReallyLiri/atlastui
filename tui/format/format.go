@@ -1,4 +1,4 @@
-package tui
+package format
 
 import (
 	"github.com/reallyliri/atlastui/inspect"
@@ -7,16 +7,16 @@ import (
 )
 
 const (
-	breadcrumbsSeparator = "►"
-	inlineListSeparator  = ", "
-	tabsSeparator        = " · "
+	BreadcrumbsSeparator = "►"
+	InlineListSeparator  = ", "
+	TabsSeparator        = " · "
 )
 
-func formatBool(b bool) string {
+func Bool(b bool) string {
 	return lo.Ternary(b, "Yes", "No")
 }
 
-func formatColumnName(table inspect.Table, col inspect.Column) string {
+func ColumnName(table inspect.Table, col inspect.Column) string {
 	sb := strings.Builder{}
 	if table.PrimaryKey != nil && lo.ContainsBy(table.PrimaryKey.Parts, func(part inspect.IndexPart) bool {
 		return part.Column == col.Name
