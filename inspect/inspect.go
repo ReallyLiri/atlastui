@@ -11,7 +11,7 @@ import (
 )
 
 const cliErrorPrefix = "Error: "
-const jsonFormat = "json"
+const jsonFormat = "{{ json . }}"
 
 type Params struct {
 	atlasexec.SchemaInspectParams

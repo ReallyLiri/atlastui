@@ -43,6 +43,6 @@ require (
 	golang.org/x/text v0.13.0 // indirect
 )
 
-replace ariga.io/atlas-go-sdk => github.com/reallyliri/atlas-go-sdk v0.0.0-20240205160716-f8f68bbe0caa
+replace ariga.io/atlas-go-sdk => github.com/reallyliri/atlas-go-sdk v0.0.0-20240208170532-0aa83de49604
 
 replace github.com/charmbracelet/bubbles => github.com/reallyliri/bubbles v0.0.0-20240207125603-b3515aa1ed68

@@ -58,8 +58,8 @@ github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/reallyliri/atlas-go-sdk v0.0.0-20240205160716-f8f68bbe0caa h1:UjUFtC5gcvMuX9dKT/I/AIcCKm+ABH3Mv62lusL8oko=
-github.com/reallyliri/atlas-go-sdk v0.0.0-20240205160716-f8f68bbe0caa/go.mod h1:owkEEXw6jqne5KPVDfKsYB7cwMiMk3jtOiAAeKxS/yU=
+github.com/reallyliri/atlas-go-sdk v0.0.0-20240208170532-0aa83de49604 h1:Jeu/q/QmvBwXoJWtEk9yonWwUqi4zIAgt1jlBTYUgus=
+github.com/reallyliri/atlas-go-sdk v0.0.0-20240208170532-0aa83de49604/go.mod h1:owkEEXw6jqne5KPVDfKsYB7cwMiMk3jtOiAAeKxS/yU=
 github.com/reallyliri/bubbles v0.0.0-20240207125603-b3515aa1ed68 h1:gEgdPtMnzvKS7ophW18W/JVmZlaaIM9/SbB03HuWoS4=
 github.com/reallyliri/bubbles v0.0.0-20240207125603-b3515aa1ed68/go.mod h1:08qhZhtIwzgrtBjAcJnij1t1H0ZRjwHyGsy6AL11PSw=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
