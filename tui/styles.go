@@ -3,7 +3,6 @@ package tui
 import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/samber/lo"
 )
 
 const (
@@ -12,11 +11,6 @@ const (
 	greenTint         = lipgloss.Color("#46b17b")
 	borderFocusedTint = lipgloss.Color("63")
 	borderBluredTint  = lipgloss.Color("240")
-)
-
-const (
-	breadcrumbsSeparator = "►"
-	inlineListSeparator  = ", "
 )
 
 var (
@@ -30,7 +24,3 @@ var (
 	borderBluredStyle       = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderForeground(borderBluredTint)
 	noDataStyle             = lipgloss.NewStyle().Foreground(subTitleTint).AlignHorizontal(lipgloss.Center).Padding(2)
 )
-
-func formatBool(b bool) string {
-	return lo.Ternary(b, "Yes", "No")
-}
