@@ -32,9 +32,9 @@ require (
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
-	github.com/rivo/uniseg v0.4.6 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
-	github.com/sahilm/fuzzy v0.1.1-0.20230530133925-c48e322e2a8f // indirect
+	github.com/sahilm/fuzzy v0.1.1 // indirect
 	github.com/zclconf/go-cty v1.14.1 // indirect
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/sync v0.1.0 // indirect
@@ -45,4 +45,4 @@ require (
 
 replace ariga.io/atlas-go-sdk => github.com/reallyliri/atlas-go-sdk v0.5.2
 
-replace github.com/charmbracelet/bubbles => ../bubbles // github.com/reallyliri/bubbles v0.0.0-20240207125603-b3515aa1ed68
+replace github.com/charmbracelet/bubbles => github.com/reallyliri/bubbles v0.18.1
