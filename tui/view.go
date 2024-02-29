@@ -36,25 +36,25 @@ func (m *model) View() string {
 			detailsWidth := (m.state.termWidth*2)/3 - borderWidth
 			tabsView = m.tabsView(detailsWidth, m.state.focused == types.DetailsTabFocused)
 
-			var currTbl chart.Model
+			var currChart chart.Model
 			switch m.state.selectedTab {
 			case types.ColumnsTable:
-				currTbl = m.vms.colsChart
+				currChart = m.vms.colsChart
 			case types.IndexesTable:
-				currTbl = m.vms.idxChart
+				currChart = m.vms.idxChart
 			case types.ForeignKeysTable:
-				currTbl = m.vms.fksChart
+				currChart = m.vms.fksChart
 			}
-			currTbl.SetWidth(detailsWidth)
-			currTbl.SetHeight(centerHeight - lipgloss.Height(tabsView) - borderHeight + 2)
-			if len(currTbl.Rows()) == 0 {
+			currChart.SetWidth(detailsWidth)
+			currChart.SetHeight(centerHeight - lipgloss.Height(tabsView) - borderHeight + 2)
+			if len(currChart.Rows()) == 0 {
 				noData := fmt.Sprintf("No %s", m.state.selectedTab.Title())
 				details = withBorder(styles.NoDataStyle.Copy().
-					Width(currTbl.Width()).
-					Height(currTbl.Height()+1).
+					Width(currChart.Width()).
+					Height(currChart.Height()+1).
 					Render(noData), m.state.focused == types.DetailsContentsFocused)
 			} else {
-				details = withBorder(currTbl.View(), m.state.focused == types.DetailsContentsFocused)
+				details = withBorder(currChart.View(), m.state.focused == types.DetailsContentsFocused)
 			}
 		}
 	}
