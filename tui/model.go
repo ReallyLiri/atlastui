@@ -33,7 +33,6 @@ type modelState struct {
 	selectedTab    types.TableDetailsSection
 	focused        types.FocusedComponent
 	quitting       bool
-	easteregg      bool
 	termWidth      int
 	termHeight     int
 }

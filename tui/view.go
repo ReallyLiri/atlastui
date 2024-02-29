@@ -13,19 +13,9 @@ import (
 	"strings"
 )
 
-//go:embed res/atlas.ans
-var atlas string
-
 func (m *model) View() string {
 	if m.state.quitting || m.state.termWidth == 0 || m.state.termHeight == 0 {
 		return ""
-	}
-	if m.state.easteregg {
-		height := lipgloss.Height(atlas)
-		if height > m.state.termHeight {
-			atlas = strings.Join(strings.Split(atlas, "\n")[:m.state.termHeight], "\n")
-		}
-		return lipgloss.NewStyle().Width(m.state.termWidth).Height(m.state.termHeight).Align(lipgloss.Right).Background(styles.WhiteTint).Foreground(styles.WhiteTint).Render(atlas)
 	}
 
 	borderWidth, borderHeight := styles.BorderFocusedStyle.GetFrameSize()

@@ -25,10 +25,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case spinner.TickMsg:
 		m.vms.globe, cmd = m.vms.globe.Update(msg)
 	case tea.KeyMsg:
-		if m.state.easteregg {
-			m.state.easteregg = !m.state.easteregg
-			break
-		}
 		switch {
 		case key.Matches(tmsg, keymap.Tab):
 			m.state.focused = (m.state.focused + 1) % 3
@@ -56,8 +52,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(tmsg, keymap.Quit):
 			m.state.quitting = true
 			return m, tea.Quit
-		case tmsg.String() == "a":
-			m.state.easteregg = !m.state.easteregg
 		}
 	}
 	return m, cmd
