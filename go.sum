@@ -1,5 +1,5 @@
-ariga.io/atlas v0.19.0 h1:gilVpXabeiGhGI9lj/rQURkXBemnloc41RGOtwVLNc4=
-ariga.io/atlas v0.19.0/go.mod h1:uj3pm+hUTVN/X5yfdBexHlZv+1Xu5u5ZbZx7+CDavNU=
+ariga.io/atlas v0.19.1-0.20240218093714-1a4929bdea1f h1:76LCzgWyu26mvXyZG9rvreRey44cNCB05CZWgzv5Evo=
+ariga.io/atlas v0.19.1-0.20240218093714-1a4929bdea1f/go.mod h1:uj3pm+hUTVN/X5yfdBexHlZv+1Xu5u5ZbZx7+CDavNU=
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=
 github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
@@ -58,10 +58,8 @@ github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/reallyliri/atlas-go-sdk v0.0.0-20240208170532-0aa83de49604 h1:Jeu/q/QmvBwXoJWtEk9yonWwUqi4zIAgt1jlBTYUgus=
-github.com/reallyliri/atlas-go-sdk v0.0.0-20240208170532-0aa83de49604/go.mod h1:owkEEXw6jqne5KPVDfKsYB7cwMiMk3jtOiAAeKxS/yU=
-github.com/reallyliri/bubbles v0.0.0-20240207125603-b3515aa1ed68 h1:gEgdPtMnzvKS7ophW18W/JVmZlaaIM9/SbB03HuWoS4=
-github.com/reallyliri/bubbles v0.0.0-20240207125603-b3515aa1ed68/go.mod h1:08qhZhtIwzgrtBjAcJnij1t1H0ZRjwHyGsy6AL11PSw=
+github.com/reallyliri/atlas-go-sdk v0.5.2 h1:6fmVi4R7vXjZtSAM0V7+ozspyOlt/uipasjmHLt6ak4=
+github.com/reallyliri/atlas-go-sdk v0.5.2/go.mod h1:9mrVidREa1AU5WeSxNz7LuTwB1o6CzEMHSYfD8U0Zpc=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.6 h1:Sovz9sDSwbOz9tgUy8JpT+KgCkPYJEN/oYzlJiYTNLg=

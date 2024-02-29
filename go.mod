@@ -1,9 +1,9 @@
 module github.com/reallyliri/atlastui
 
-go 1.21.0
+go 1.22.0
 
 require (
-	ariga.io/atlas-go-sdk v0.4.0
+	ariga.io/atlas-go-sdk v0.5.2
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.9.1
@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	ariga.io/atlas v0.19.0 // indirect
+	ariga.io/atlas v0.19.1-0.20240218093714-1a4929bdea1f // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
@@ -43,6 +43,6 @@ require (
 	golang.org/x/text v0.13.0 // indirect
 )
 
-replace ariga.io/atlas-go-sdk => github.com/reallyliri/atlas-go-sdk v0.0.0-20240208170532-0aa83de49604
+replace ariga.io/atlas-go-sdk => github.com/reallyliri/atlas-go-sdk v0.5.2
 
-replace github.com/charmbracelet/bubbles => github.com/reallyliri/bubbles v0.0.0-20240207125603-b3515aa1ed68
+replace github.com/charmbracelet/bubbles => ../bubbles // github.com/reallyliri/bubbles v0.0.0-20240207125603-b3515aa1ed68
