@@ -7,7 +7,7 @@ Pronounced "atla-stewie", `atlastui` is an [atlas](https://atlasgo.io/) text use
 ## Installation
 
 ```sh
-go install github.com/akosmarton/atlastui@latest
+go install github.com/reallyliri/atlastui@latest
 ```
 
 ## TODO
